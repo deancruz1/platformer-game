@@ -76,7 +76,7 @@ public class GamePanel extends JPanel{
 		this.isMoving = isMoving;
 	}
 	
-	private void updateAnimationsTick() {
+	private void updateAnimationTick() {
 		aniTick++;
 		if (aniTick >= aniSpeed) {
 			aniTick = 0;
@@ -118,13 +118,14 @@ public class GamePanel extends JPanel{
 	}
 
 	
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g); //a method that we don't actually call, but need, for painting
-		
-		updateAnimationsTick();
-		
+	public void updateGame() {
+		updateAnimationTick();
 		setAnimation();
 		updatePos();
+	}
+	
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g); //a method that we don't actually call, but need, for painting
 		
 		g.drawImage(animations[playerAction][aniIndex], (int)xDelta, (int)yDelta, 256, 160, null);
 	}
