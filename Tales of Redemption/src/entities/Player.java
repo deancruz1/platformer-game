@@ -1,28 +1,29 @@
 package entities;
 
 import static utilz.Constants.PlayerConstants.*;
-import static utilz.Constants.Directions.*;
-
+import static utilz.HelpMethods.*;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
 
+import main.Game;
 import utilz.LoadSave;
 
 public class Player extends Entity {
 
 	private BufferedImage[][] animations;
-	private int aniTick, aniIndex, aniSpeed = 15;
+	private int aniTick, aniIndex, aniSpeed = 25;
 	private int playerAction = IDLE;
 	private boolean isMoving = false, isAttacking = false;
 	private boolean left, up, right, down;
 	private float playerSpeed = 2.0f;
+	private int[][] lvlData;
+	private float xDrawOffset = 21 * Game.SCALE;
+	private float yDrawOffset = 4 * Game.SCALE;
 	
 	public Player(float x, float y, int width, int height) {
 		super(x, y, width, height);
 		loadAnimations();
+		initHitbox(x, y, 20 * Game.SCALE, 28 * Game.SCALE);
 	}
 	
 	public void update() {
@@ -32,8 +33,8 @@ public class Player extends Entity {
 	}
 	
 	public void render(Graphics g) {
-		g.drawImage(animations[playerAction][aniIndex], (int)x, (int)y, width, height, null);
-
+		g.drawImage(animations[playerAction][aniIndex], (int)(hitbox.x - xDrawOffset), (int)(hitbox.y - yDrawOffset), width, height, null);
+		drawHitbox(g);
 	}
 	
 	
@@ -76,26 +77,33 @@ public class Player extends Entity {
 	}
 
 	private void updatePos() {
-		
 		isMoving = false;
 		
-		if(left && !right) {
-			x -= playerSpeed;
-			isMoving = true;
-			
-		} else if (right && !left) {
-			x += playerSpeed;
-			isMoving = true;
+		if (!left && !right && !up && !down) {
+			return;
 		}
 		
-		if(up && !down) {
-			y -= playerSpeed;
-			isMoving = true;
+		float xSpeed = 0, ySpeed = 0;
+		
+		if (left && !right) {
+			xSpeed = -playerSpeed;
+			
+		} else if (right && !left) {
+			xSpeed = playerSpeed;
+		}
+		
+		if (up && !down) {
+			ySpeed = -playerSpeed;
 
 		} else if (down && !up) {
-			y += playerSpeed;
-			isMoving = true;
+			ySpeed = playerSpeed;
 
+		}
+				
+		if (canMoveHere(hitbox.x + xSpeed, hitbox.y + ySpeed, hitbox.width, hitbox.height, lvlData)) {
+			hitbox.x += xSpeed;
+			hitbox.y += ySpeed;
+			isMoving = true;
 		}
 		
 	}
@@ -112,6 +120,10 @@ public class Player extends Entity {
 			}
 		}
 
+	}
+	
+	public void loadLvlData(int[][] lvlData) {
+		this.lvlData = lvlData;
 	}
 	
 	public void resetDirBooleans() {
