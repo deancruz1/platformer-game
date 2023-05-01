@@ -15,8 +15,8 @@ public class GameWindow {
 		jframe.add(gamePanel);
 		jframe.setResizable(false);
 		jframe.pack();
-		jframe.setVisible(true);
 		jframe.setLocationRelativeTo(null); //sets screen to start in the middle
+		jframe.setVisible(true);
 		jframe.addWindowFocusListener(new WindowFocusListener() {
 
 			public void windowGainedFocus(WindowEvent e) {

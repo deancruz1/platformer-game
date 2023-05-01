@@ -1,7 +1,6 @@
 package inputs;
 
 import java.awt.event.KeyEvent;
-import static utilz.Constants.Directions.*;
 import java.awt.event.KeyListener;
 
 import gamestates.Gamestate;
