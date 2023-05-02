@@ -188,4 +188,9 @@ public class Playing extends State implements Statemethods {
 		return player;
 	}
 
+	public void resetAll() {
+		//TODO: reset playing, enemy, lvl, etc.
+		
+	}
+
 }
