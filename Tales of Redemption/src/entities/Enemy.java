@@ -2,6 +2,9 @@ package entities;
 
 import static utilz.Constants.EnemyConstants.*;
 import static utilz.HelpMethods.*;
+
+import java.awt.geom.Rectangle2D;
+
 import static utilz.Constants.Directions.*;
 
 import main.Game;
@@ -20,6 +23,8 @@ public abstract class Enemy extends Entity {
 	protected float attackDistance = Game.TILES_SIZE;
 	protected int maxHealth;
 	protected int currentHealth;
+	protected boolean active = true;
+	protected boolean attackChecked;
 	
 	public Enemy(float x, float y, int width, int height, int enemyType) {
 		super(x, y, width, height);
@@ -116,10 +121,21 @@ public abstract class Enemy extends Entity {
 			
 			if (aniIndex >= getSpriteAmount(enemyType, enemyState)) {
 				aniIndex = 0;
-				if (enemyState == ATTACK)
-					enemyState = IDLE;
+				
+				switch(enemyState) {
+				case ATTACK, HIT -> enemyState = IDLE;
+				case DEAD -> active = false;
+				
+				}
 			}
 		}
+	}
+	
+	protected void checkEnemyHit(Rectangle2D.Float attackBox, Player player) {
+		if (attackBox.intersects(player.hitbox))
+			player.changeHealth(-getEnemyDmg(enemyType));
+		attackChecked = true;
+		
 	}
 	
 	protected void changeWalkDir() {
@@ -129,6 +145,16 @@ public abstract class Enemy extends Entity {
 			walkDir = LEFT;
 		
 	}
+	
+	public void resetEnemy() {
+		hitbox.x = x;
+		hitbox.y = y;
+		firstUpdate = true;
+		currentHealth = maxHealth;
+		newState(IDLE);
+		active = true;
+		fallSpeed = 0;
+	}
 
 	public int getAniIndex() {
 		return aniIndex;
@@ -136,6 +162,10 @@ public abstract class Enemy extends Entity {
 	
 	public int getEnemyState() {
 		return enemyState;
+	}
+
+	public boolean isActive() {
+		return active;
 	}
 	
 }

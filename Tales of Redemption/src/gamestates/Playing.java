@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Float;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
@@ -13,6 +15,7 @@ import entities.EnemyManager;
 import entities.Player;
 import levels.LevelManager;
 import main.Game;
+import ui.GameOverOverlay;
 import ui.PauseOverlay;
 import utilz.LoadSave;
 
@@ -22,6 +25,7 @@ public class Playing extends State implements Statemethods {
 	private LevelManager levelManager;
 	private EnemyManager enemyManager;
 	private PauseOverlay pauseOverlay;
+	private GameOverOverlay gameOverOverlay;
 	private boolean paused = false;
 	
 	private int xLvlOffset;
@@ -34,6 +38,8 @@ public class Playing extends State implements Statemethods {
 	private BufferedImage backgroundImg, bigCloud, smallCloud;
 	private int[] smallCloudsPos;
 	private Random rnd = new Random();
+	
+	private boolean gameOver;
 	
 	public Playing(Game game) {
 		super(game);
@@ -51,14 +57,15 @@ public class Playing extends State implements Statemethods {
 	private void initClasses() {
 		levelManager = new LevelManager(game);
 		enemyManager = new EnemyManager(this);
-		player = new Player(80 * Game.SCALE, 280 * Game.SCALE, (int) (64 * Game.SCALE), (int) (40 * Game.SCALE));
+		player = new Player(80 * Game.SCALE, 280 * Game.SCALE, (int) (64 * Game.SCALE), (int) (40 * Game.SCALE), this);
 		player.loadLvlData(levelManager.getCurrentLevel().getLevelData());
 		pauseOverlay = new PauseOverlay(this);
+		gameOverOverlay = new GameOverOverlay(this);
 	}
 	
 	@Override
 	public void update() {
-		if (!paused) {
+		if (!paused && !gameOver) {
 			levelManager.update();
 			player.update();
 			enemyManager.update(levelManager.getCurrentLevel().getLevelData(), player);
@@ -99,7 +106,8 @@ public class Playing extends State implements Statemethods {
 			g.setColor(new Color(0, 0, 0, 150));
 			g.fillRect(0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT);
 			pauseOverlay.draw(g);
-		}
+		} else if (gameOver)
+			gameOverOverlay.draw(g);
 	}
 
 	private void drawClouds(Graphics g) {
@@ -113,67 +121,76 @@ public class Playing extends State implements Statemethods {
 	}
 
 	public void mouseDragged(MouseEvent e) {
-		if (paused)
-			pauseOverlay.mouseDragged(e);
+		if (!gameOver)
+			if (paused)
+				pauseOverlay.mouseDragged(e);
 	}
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (e.getButton() == MouseEvent.BUTTON1) {
-			player.setAttacking(true);
-		}
+		if (!gameOver)
+			if (e.getButton() == MouseEvent.BUTTON1) {
+				player.setAttacking(true);
+			}
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		if (paused)
-			pauseOverlay.mousePressed(e);
+		if (!gameOver)
+			if (paused)
+				pauseOverlay.mousePressed(e);
 		
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		if (paused)
-			pauseOverlay.mouseReleased(e);		
+		if (!gameOver)
+			if (paused)
+				pauseOverlay.mouseReleased(e);		
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		if (paused)
-			pauseOverlay.mouseMoved(e);		
+		if (!gameOver)
+			if (paused)
+				pauseOverlay.mouseMoved(e);		
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		switch(e.getKeyCode()) {
-		case KeyEvent.VK_A:
-			player.setLeft(true);
-			break;
-		case KeyEvent.VK_D:
-			player.setRight(true);
+		if (gameOver)
+			gameOverOverlay.keyPressed(e);
+		else
+			switch(e.getKeyCode()) {
+			case KeyEvent.VK_A:
+				player.setLeft(true);
 				break;
-		case KeyEvent.VK_SPACE:
-			player.setJump(true);
-			break;
-		case KeyEvent.VK_ESCAPE:
-			paused = !paused;
-			break;
-		}		
+			case KeyEvent.VK_D:
+				player.setRight(true);
+					break;
+			case KeyEvent.VK_SPACE:
+				player.setJump(true);
+				break;
+			case KeyEvent.VK_ESCAPE:
+				paused = !paused;
+				break;
+			}		
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		switch(e.getKeyCode()) {
-		case KeyEvent.VK_A:
-			player.setLeft(false);
-			break;
-		case KeyEvent.VK_D:
-			player.setRight(false);
+		if (!gameOver)
+			switch(e.getKeyCode()) {
+			case KeyEvent.VK_A:
+				player.setLeft(false);
 				break;
-		case KeyEvent.VK_SPACE:
-			player.setJump(false);
-			break;
-		}		
+			case KeyEvent.VK_D:
+				player.setRight(false);
+					break;
+			case KeyEvent.VK_SPACE:
+				player.setJump(false);
+				break;
+			}		
 	}
 	
 	public void unpauseGame() {
@@ -190,7 +207,20 @@ public class Playing extends State implements Statemethods {
 
 	public void resetAll() {
 		//TODO: reset playing, enemy, lvl, etc.
+		gameOver = false;
+		paused = false;
+		player.resetAll();
+		enemyManager.resetAllEnemies();
 		
+	}
+
+	public void checkEnemyHit(Rectangle2D.Float attackBox) {
+		enemyManager.checkEnemyHit(attackBox);
+		
+	}
+
+	public void setGameOver(boolean gameOver) {
+		this.gameOver = gameOver;
 	}
 
 }
