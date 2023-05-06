@@ -288,5 +288,14 @@ public class Playing extends State implements Statemethods {
 		objectManager.checkObjectHit(attackBox);
 		
 	}
+	
+	public LevelManager getLevelManager() {
+		return levelManager;
+	}
+
+	public void checkSpikesTouched(Player p) {
+		objectManager.checkSpikesTouched(p);
+		
+	}
 
 }

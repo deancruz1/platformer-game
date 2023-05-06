@@ -83,8 +83,10 @@ public class Player extends Entity {
 		updateAttackBox();
 		
 		updatePos();
-		if (isMoving)
+		if (isMoving) {
 			checkPotionTouched();
+			checkSpikesTouched();
+		}
 		
 		if (isAttacking)
 			checkAttack();
@@ -92,6 +94,11 @@ public class Player extends Entity {
 		setAnimation();
 	}
 	
+	private void checkSpikesTouched() {
+		playing.checkSpikesTouched(this);
+		
+	}
+
 	private void checkPotionTouched() {
 		playing.checkPotionTouched(hitbox);
 		
@@ -194,10 +201,6 @@ public class Player extends Entity {
 			jump();
 		}
 		
-//		if (!left && !right && !inAir) {
-//			return;
-//		}
-		
 		if (!inAir)
 			if((!left && !right) || (right && left))
 				return;
@@ -282,6 +285,12 @@ public class Player extends Entity {
 			currentHealth = maxHealth;
 	}
 
+	public void kill() {
+		currentHealth = 0;
+		
+	}
+	
+	
 	private void loadAnimations() {
 
 		BufferedImage img = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS);
@@ -350,6 +359,6 @@ public class Player extends Entity {
 		System.out.println("Added power");
 		
 	}
-	
+
 	
 }
