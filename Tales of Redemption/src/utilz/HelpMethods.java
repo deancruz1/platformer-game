@@ -14,6 +14,7 @@ import main.Game;
 import objects.Cannon;
 import objects.GameContainer;
 import objects.Potion;
+import objects.Projectile;
 import objects.Spike;
 
 public class HelpMethods {
@@ -125,6 +126,10 @@ public class HelpMethods {
 					return false;
 			}
 		return true;
+	}
+	
+	public static boolean isProjectileHittingLevel(Projectile p, int[][] lvlData) {
+		return isSolid((int) (p.getHitbox().x + p.getHitbox().width / 2), (int) (p.getHitbox().y + p.getHitbox().height), lvlData);
 	}
 	
 	public static boolean isSightClear(int[][] lvlData, Rectangle2D.Float firstHitbox,
